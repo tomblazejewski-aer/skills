@@ -22,6 +22,16 @@ If you want to keep up with changes to these skills, and any new ones I create, 
 
 [Sign Up To The Newsletter](https://www.aihero.dev/s/skills-newsletter)
 
+## Activating skills in this repo (OpenCode)
+
+If you're working inside this repo and want the skills active in OpenCode as project-local skills, run:
+
+```bash
+./scripts/sync-skills.sh
+```
+
+This copies all registered skills into `.opencode/skills/` (gitignored). Re-run it any time you add or remove a skill from `.claude-plugin/plugin.json`.
+
 ## Quickstart (30-second setup)
 
 1. Run the skills.sh installer:
@@ -156,6 +166,7 @@ Skills I use daily for code work.
 - **[to-prd](./skills/engineering/to-prd/SKILL.md)** — Turn the current conversation context into a PRD and submit it as a GitHub issue. No interview — just synthesizes what you've already discussed.
 - **[zoom-out](./skills/engineering/zoom-out/SKILL.md)** — Tell the agent to zoom out and give broader context or a higher-level perspective on an unfamiliar section of code.
 - **[prototype](./skills/engineering/prototype/SKILL.md)** — Build a throwaway prototype to flush out a design — either a runnable terminal app for state/business-logic questions, or several radically different UI variations toggleable from one route.
+- **[teach-pr](./skills/engineering/teach-pr/SKILL.md)** — Turn a GitHub PR into an adaptive quiz (MCQ, open questions, code writing), tracking per-concept progress in your Obsidian vault across sessions.
 
 ### Productivity
 
