@@ -116,6 +116,23 @@ Then write the three docs files using the seed templates in this skill folder as
 
 For "other" issue trackers, write `docs/agents/issue-tracker.md` from scratch using the user's description.
 
+**Section D — PR teaching (optional).**
+
+> Explainer: The `teach-pr` skill can turn any GitHub PR into an adaptive quiz, tracking what you've learnt across sessions in your Obsidian vault. This section is entirely optional — if you don't want it, say so and we'll skip it.
+
+Ask the user if they want to enable PR teaching. If they decline, skip the rest of Section D and record `teach-pr: disabled` in the `## Agent skills` block.
+
+If they agree, collect:
+
+1. **Obsidian vault path** — absolute path to the vault on this machine (e.g. `/Users/you/Notes` or `C:\Users\you\Notes`). The agent cannot guess this.
+2. **Progress subfolder** — the subfolder within the vault where per-concept progress notes will be written (e.g. `Learning/teach-pr`). Suggest this default; let the user override.
+3. **Known stacks** — languages and frameworks the user already knows well. Used for analogies (e.g. "Python, Django, SQL").
+4. **Target stack** — what they are trying to learn through PR teaching (e.g. "TypeScript, React").
+5. **Level in target stack** — `beginner`, `intermediate`, or `advanced`. Ask them to self-assess.
+6. **Analogy style** — confirm the analogy instruction: "Use `<known language>` equivalents when explaining `<target stack>` concepts." Adjust if the user prefers a different framing.
+
+Then write `docs/agents/learner-profile.md` using [learner-profile.md](./learner-profile.md) as the seed template, filled in with the user's answers.
+
 ### 5. Done
 
 Tell the user the setup is complete and which engineering skills will now read from these files. Mention they can edit `docs/agents/*.md` directly later — re-running this skill is only necessary if they want to switch issue trackers or restart from scratch.
