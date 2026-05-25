@@ -2,7 +2,7 @@
 # sync-skills.sh
 # 1. Copies registered skills from plugin.json into .opencode/skills/
 #    so OpenCode discovers them as project-local skills.
-# 2. Deploys AGENTS.md and opencode.json to ~/.config/opencode/
+# 2. Deploys all skills, AGENTS.md, and opencode.json to ~/.config/opencode/
 #    so this repo is the single source of truth for global OpenCode config.
 #
 # Run from the repo root:
@@ -12,7 +12,9 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PLUGIN_JSON="$REPO_ROOT/.claude-plugin/plugin.json"
-DEST="$REPO_ROOT/.opencode/skills"
+LOCAL_DEST="$REPO_ROOT/.opencode/skills"
+GLOBAL_CONFIG="$HOME/.config/opencode"
+GLOBAL_DEST="$GLOBAL_CONFIG/skills"
 
 if [[ ! -f "$PLUGIN_JSON" ]]; then
   echo "ERROR: $PLUGIN_JSON not found." >&2
@@ -25,7 +27,8 @@ mapfile -t SKILL_PATHS < <(node -e "
   p.skills.forEach(s => console.log(s));
 ")
 
-mkdir -p "$DEST"
+mkdir -p "$LOCAL_DEST"
+mkdir -p "$GLOBAL_DEST"
 
 # Track which skill names we write so we can clean up stale ones
 declare -a WRITTEN_NAMES=()
@@ -39,13 +42,13 @@ for rel_path in "${SKILL_PATHS[@]}"; do
     continue
   fi
 
-  dest_skill="$DEST/$name"
-  mkdir -p "$dest_skill"
-
-  # Copy all .md files from the skill folder
+  # Copy all .md files from the skill folder to both destinations
   copied=0
+  mkdir -p "$LOCAL_DEST/$name"
+  mkdir -p "$GLOBAL_DEST/$name"
   while IFS= read -r -d '' f; do
-    cp "$f" "$dest_skill/"
+    cp "$f" "$LOCAL_DEST/$name/"
+    cp "$f" "$GLOBAL_DEST/$name/"
     ((copied++)) || true
   done < <(find "$src" -maxdepth 1 -name "*.md" -print0)
 
@@ -53,27 +56,27 @@ for rel_path in "${SKILL_PATHS[@]}"; do
   echo "  synced  $name  ($copied files)"
 done
 
-# Remove stale skill folders no longer in plugin.json
-if [[ -d "$DEST" ]]; then
-  while IFS= read -r -d '' existing; do
-    existing_name="$(basename "$existing")"
-    keep=false
-    for n in "${WRITTEN_NAMES[@]}"; do
-      [[ "$n" == "$existing_name" ]] && keep=true && break
-    done
-    if [[ "$keep" == false ]]; then
-      rm -rf "$existing"
-      echo "  removed $existing_name (no longer registered)"
-    fi
-  done < <(find "$DEST" -mindepth 1 -maxdepth 1 -type d -print0)
-fi
+# Remove stale skill folders no longer in plugin.json — both destinations
+for dest_dir in "$LOCAL_DEST" "$GLOBAL_DEST"; do
+  if [[ -d "$dest_dir" ]]; then
+    while IFS= read -r -d '' existing; do
+      existing_name="$(basename "$existing")"
+      keep=false
+      for n in "${WRITTEN_NAMES[@]}"; do
+        [[ "$n" == "$existing_name" ]] && keep=true && break
+      done
+      if [[ "$keep" == false ]]; then
+        rm -rf "$existing"
+        echo "  removed $existing_name from $dest_dir (no longer registered)"
+      fi
+    done < <(find "$dest_dir" -mindepth 1 -maxdepth 1 -type d -print0)
+  fi
+done
 
 echo ""
-echo "Done. ${#WRITTEN_NAMES[@]} skill(s) active in .opencode/skills/"
+echo "Done. ${#WRITTEN_NAMES[@]} skill(s) synced to project-local and global config."
 
 # Deploy AGENTS.md and opencode.json to global OpenCode config
-GLOBAL_CONFIG="$HOME/.config/opencode"
-
 echo ""
 echo "Deploying global config to $GLOBAL_CONFIG ..."
 

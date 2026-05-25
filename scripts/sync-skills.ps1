@@ -1,7 +1,7 @@
 # sync-skills.ps1
 # 1. Copies registered skills from plugin.json into .opencode/skills/
 #    so OpenCode discovers them as project-local skills.
-# 2. Deploys AGENTS.md and opencode.json to $env:USERPROFILE\.config\opencode\
+# 2. Deploys all skills, AGENTS.md, and opencode.json to $env:USERPROFILE\.config\opencode\
 #    so this repo is the single source of truth for global OpenCode config.
 #
 # Run from the repo root:
@@ -12,7 +12,9 @@ $ErrorActionPreference = 'Stop'
 
 $RepoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
 $PluginJson = Join-Path $RepoRoot '.claude-plugin\plugin.json'
-$Dest = Join-Path $RepoRoot '.opencode\skills'
+$LocalDest = Join-Path $RepoRoot '.opencode\skills'
+$GlobalConfig = Join-Path $env:USERPROFILE '.config\opencode'
+$GlobalDest = Join-Path $GlobalConfig 'skills'
 
 if (-not (Test-Path -LiteralPath $PluginJson)) {
     Write-Error "ERROR: $PluginJson not found."
@@ -22,7 +24,8 @@ if (-not (Test-Path -LiteralPath $PluginJson)) {
 # Parse the skills array from plugin.json using node
 $SkillPaths = @(node -e "const p = require('$($PluginJson -replace '\\','/')'); p.skills.forEach(s => console.log(s))")
 
-New-Item -ItemType Directory -Path $Dest -Force | Out-Null
+New-Item -ItemType Directory -Path $LocalDest -Force | Out-Null
+New-Item -ItemType Directory -Path $GlobalDest -Force | Out-Null
 
 # Track which skill names we write so we can clean up stale ones
 $WrittenNames = @()
@@ -36,35 +39,41 @@ foreach ($RelPath in $SkillPaths) {
         continue
     }
 
-    $DestSkill = Join-Path $Dest $Name
-    New-Item -ItemType Directory -Path $DestSkill -Force | Out-Null
-
-    # Copy all .md files from the skill folder
+    # Copy all .md files from the skill folder to both destinations
     $Files = @(Get-ChildItem -LiteralPath $Src -Filter '*.md' -File)
+
+    $LocalSkill = Join-Path $LocalDest $Name
+    New-Item -ItemType Directory -Path $LocalSkill -Force | Out-Null
     foreach ($File in $Files) {
-        Copy-Item -LiteralPath $File.FullName -Destination $DestSkill -Force
+        Copy-Item -LiteralPath $File.FullName -Destination $LocalSkill -Force
+    }
+
+    $GlobalSkill = Join-Path $GlobalDest $Name
+    New-Item -ItemType Directory -Path $GlobalSkill -Force | Out-Null
+    foreach ($File in $Files) {
+        Copy-Item -LiteralPath $File.FullName -Destination $GlobalSkill -Force
     }
 
     $WrittenNames += $Name
     Write-Host "  synced  $Name  ($($Files.Count) files)"
 }
 
-# Remove stale skill folders no longer in plugin.json
-if (Test-Path -LiteralPath $Dest) {
-    Get-ChildItem -LiteralPath $Dest -Directory | ForEach-Object {
-        if ($WrittenNames -notcontains $_.Name) {
-            Remove-Item -LiteralPath $_.FullName -Recurse -Force
-            Write-Host "  removed $($_.Name) (no longer registered)"
+# Remove stale skill folders no longer in plugin.json — both destinations
+foreach ($DestDir in @($LocalDest, $GlobalDest)) {
+    if (Test-Path -LiteralPath $DestDir) {
+        Get-ChildItem -LiteralPath $DestDir -Directory | ForEach-Object {
+            if ($WrittenNames -notcontains $_.Name) {
+                Remove-Item -LiteralPath $_.FullName -Recurse -Force
+                Write-Host "  removed $($_.Name) from $DestDir (no longer registered)"
+            }
         }
     }
 }
 
 Write-Host ""
-Write-Host "Done. $($WrittenNames.Count) skill(s) active in .opencode/skills/"
+Write-Host "Done. $($WrittenNames.Count) skill(s) synced to project-local and global config."
 
 # Deploy AGENTS.md and opencode.json to global OpenCode config
-$GlobalConfig = Join-Path $env:USERPROFILE '.config\opencode'
-
 Write-Host ""
 Write-Host "Deploying global config to $GlobalConfig ..."
 
