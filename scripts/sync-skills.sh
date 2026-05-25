@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # sync-skills.sh
-# Copies registered skills from plugin.json into .opencode/skills/
-# so OpenCode discovers them as project-local skills.
+# 1. Copies registered skills from plugin.json into .opencode/skills/
+#    so OpenCode discovers them as project-local skills.
+# 2. Deploys AGENTS.md and opencode.json to ~/.config/opencode/
+#    so this repo is the single source of truth for global OpenCode config.
 #
 # Run from the repo root:
 #   ./scripts/sync-skills.sh
@@ -68,3 +70,26 @@ fi
 
 echo ""
 echo "Done. ${#WRITTEN_NAMES[@]} skill(s) active in .opencode/skills/"
+
+# Deploy AGENTS.md and opencode.json to global OpenCode config
+GLOBAL_CONFIG="$HOME/.config/opencode"
+
+echo ""
+echo "Deploying global config to $GLOBAL_CONFIG ..."
+
+if [[ -f "$REPO_ROOT/AGENTS.md" ]]; then
+  cp "$REPO_ROOT/AGENTS.md" "$GLOBAL_CONFIG/agents.md"
+  echo "  synced  AGENTS.md -> $GLOBAL_CONFIG/agents.md"
+else
+  echo "  WARN: AGENTS.md not found, skipping"
+fi
+
+if [[ -f "$REPO_ROOT/opencode.json" ]]; then
+  cp "$REPO_ROOT/opencode.json" "$GLOBAL_CONFIG/opencode.json"
+  echo "  synced  opencode.json -> $GLOBAL_CONFIG/opencode.json"
+else
+  echo "  WARN: opencode.json not found, skipping"
+fi
+
+echo ""
+echo "Global config deploy complete."

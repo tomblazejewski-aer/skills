@@ -1,0 +1,6 @@
+{
+  "repos": [
+    { "path": "C:\\path\\to\\your-repo", "github": "org/repo-name" },
+    { "path": "C:\\path\\to\\another-repo", "github": "org/another-repo" }
+  ]
+}
