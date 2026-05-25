@@ -27,10 +27,16 @@ If you want to keep up with changes to these skills, and any new ones I create, 
 If you're working inside this repo and want the skills active in OpenCode as project-local skills, run:
 
 ```bash
+# Linux/Mac
 ./scripts/sync-skills.sh
 ```
 
-This copies all registered skills into `.opencode/skills/` (gitignored). Re-run it any time you add or remove a skill from `.claude-plugin/plugin.json`.
+```powershell
+# Windows
+.\scripts\sync-skills.ps1
+```
+
+This copies all registered skills into `.opencode/skills/` (gitignored) and deploys `AGENTS.md` and `opencode.json` to your global OpenCode config directory. Re-run it any time you add or remove a skill from `.claude-plugin/plugin.json`.
 
 ## Quickstart (30-second setup)
 
