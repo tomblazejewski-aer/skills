@@ -1,35 +1,76 @@
 ---
-description: Plan a feature with acceptance criteria and verification commands
+description: Interview the user (grill-with-docs), design TDD-first, then write a plan with behavioral acceptance criteria
 agent: plan
 ---
 
-Read the project's coding standards:
+Load the grill-with-docs interview methodology:
 
-!cat STANDARDS.md 2>/dev/null || cat "$HOME/.config/opencode/STANDARDS.md" 2>/dev/null || echo "No STANDARDS.md found"
+!cat .opencode/skills/grill-with-docs/SKILL.md 2>/dev/null || cat "$HOME/.config/opencode/skills/grill-with-docs/SKILL.md" 2>/dev/null || echo "(grill-with-docs skill not found — use a thorough one-question-at-a-time interview approach anyway)"
 
-You are now in planning mode. Your task is to write a detailed implementation plan for the feature described above.
+Load the CONTEXT.md format:
 
-Before writing the plan:
-1. Understand the feature request and any constraints
-2. Identify which coding standards apply to this task
+!cat .opencode/skills/grill-with-docs/CONTEXT-FORMAT.md 2>/dev/null || cat "$HOME/.config/opencode/skills/grill-with-docs/CONTEXT-FORMAT.md" 2>/dev/null
 
-Then write the plan to `.opencode/plans/<timestamp>-<slug>.md` using the current Unix timestamp and a kebab-case slug based on the feature name.
+Load the ADR format:
 
-The plan file must contain exactly these three sections:
+!cat .opencode/skills/grill-with-docs/ADR-FORMAT.md 2>/dev/null || cat "$HOME/.config/opencode/skills/grill-with-docs/ADR-FORMAT.md" 2>/dev/null
 
-## Implementation Approach
+Load the TDD methodology:
 
-A clear description of what changes will be made and why — modules, functions, types, and their interactions.
+!cat .opencode/skills/tdd/SKILL.md 2>/dev/null || cat "$HOME/.config/opencode/skills/tdd/SKILL.md" 2>/dev/null || echo "(tdd skill not found — apply red-green-refactor principles anyway)"
 
-## Acceptance Criteria
+Load the coding standards:
 
-A checklist of concrete, testable statements. Each item must be independently verifiable.
+!cat STANDARDS.md 2>/dev/null || cat "$HOME/.config/opencode/STANDARDS.md" 2>/dev/null || echo "(No STANDARDS.md found)"
 
-- [ ] <testable statement>
-- [ ] <testable statement>
+---
 
-## Verification Commands
+You are in planning mode. This session has three phases — do not skip Phase 1 or Phase 2.
 
-All commands needed to confirm correctness after implementation (tests, lint, build, type-check, etc.). Pull these from the project's `package.json`, `Makefile`, `pyproject.toml`, or equivalent.
+## Phase 1 — Interview
 
-Once written, tell the user the path to the plan file.
+Follow the grill-with-docs methodology above. Interview the user relentlessly about this feature, one question at a time using the interactive prompt tool. Walk every branch of the decision tree until you reach a complete shared understanding of:
+
+- Exactly what needs to be built
+- All edge cases and constraints
+- How it fits with the existing codebase and domain model
+- What "done" looks like
+
+If a question can be answered by exploring the codebase, explore it instead of asking.
+
+Update `CONTEXT.md` inline whenever a term is resolved. Offer an ADR only if the decision is hard to reverse, surprising without context, and the result of a real trade-off.
+
+Do not move to Phase 2 until the interview is complete.
+
+## Phase 2 — TDD design
+
+Using the TDD methodology above and what you learned in Phase 1:
+
+- Confirm what interface changes are needed
+- Identify which behaviors matter most to test (prioritize; you can't test everything)
+- Design the public interface for testability — identify deep module opportunities
+- List the behaviors to test as behavioral specifications (what the system does, not how)
+
+Ask the user to confirm the interface design and testing priorities before proceeding.
+
+## Phase 3 — Write the plan
+
+Write the plan to `.opencode/plans/<timestamp>-<slug>.md` (Unix timestamp + kebab-case slug).
+
+The file must contain exactly these three sections:
+
+### Implementation Approach
+
+A clear description of what changes will be made and why, including the public interface design and module structure.
+
+### Acceptance Criteria
+
+A checklist of behavioral test specifications derived from the interview and TDD design phase. Each item describes observable behavior through a public interface — not implementation details.
+
+- [ ] <behavioral specification>
+
+### Verification Commands
+
+All commands needed to confirm correctness (tests, lint, build, type-check, etc.).
+
+Tell the user the path to the plan file when done.
