@@ -87,8 +87,10 @@ if (Test-Path -LiteralPath $AgentsMd) {
 
 $OpenCodeJson = Join-Path $RepoRoot 'opencode.json'
 if (Test-Path -LiteralPath $OpenCodeJson) {
-    Copy-Item -LiteralPath $OpenCodeJson -Destination (Join-Path $GlobalConfig 'opencode.json') -Force
-    Write-Host "  synced  opencode.json -> $GlobalConfig\opencode.json"
+    $GlobalOpenCodeJson = Join-Path $GlobalConfig 'opencode.json'
+    $MergeScript = Join-Path $RepoRoot 'scripts\merge-json.js'
+    node $MergeScript $GlobalOpenCodeJson $OpenCodeJson
+    Write-Host "  merged  opencode.json -> $GlobalConfig\opencode.json"
 } else {
     Write-Host "  WARN: opencode.json not found, skipping"
 }

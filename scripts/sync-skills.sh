@@ -88,8 +88,8 @@ else
 fi
 
 if [[ -f "$REPO_ROOT/opencode.json" ]]; then
-  cp "$REPO_ROOT/opencode.json" "$GLOBAL_CONFIG/opencode.json"
-  echo "  synced  opencode.json -> $GLOBAL_CONFIG/opencode.json"
+  node "$REPO_ROOT/scripts/merge-json.js" "$GLOBAL_CONFIG/opencode.json" "$REPO_ROOT/opencode.json"
+  echo "  merged  opencode.json -> $GLOBAL_CONFIG/opencode.json"
 else
   echo "  WARN: opencode.json not found, skipping"
 fi
