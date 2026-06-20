@@ -20,6 +20,18 @@ A canonical state-machine label applied to an **Issue** during triage (e.g. `nee
 - An **Issue tracker** holds many **Issues**
 - An **Issue** carries one **Triage role** at a time
 
+**AFK Loop**:
+The autonomous build-review cycle driven by `/afk`. A single invocation runs until all Reviewers agree the feature is correctly implemented.
+_Avoid_: autonomous workflow, dispatch loop
+
+**Review Cycle**:
+One iteration of the AFK Loop — one build pass followed by 3 parallel Reviewer verdicts. Findings are appended to the plan file as `## Review Cycle N`.
+_Avoid_: review round, iteration
+
+**Reviewer**:
+A read-only subagent with a fixed focus area (Correctness, Standards, or Architecture) that emits a `PASS | FAIL` verdict with specific findings against the current implementation.
+_Avoid_: verifier, reviewer agent
+
 ## Flagged ambiguities
 
 - "backlog" was previously used to mean both the *tool* hosting issues and the *body of work* inside it — resolved: the tool is the **Issue tracker**; "backlog" is no longer used as a domain term.
