@@ -8,6 +8,8 @@ permission:
     "*": deny
     "afk-*": allow
   skill: allow
+  external_directory:
+    "~/.config/opencode/*": allow
   bash:
     "*": allow
     "git commit*": deny
