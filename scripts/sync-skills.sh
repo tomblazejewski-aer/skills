@@ -88,10 +88,29 @@ else
 fi
 
 if [[ -f "$REPO_ROOT/opencode.json" ]]; then
-  cp "$REPO_ROOT/opencode.json" "$GLOBAL_CONFIG/opencode.json"
-  echo "  synced  opencode.json -> $GLOBAL_CONFIG/opencode.json"
+  node "$REPO_ROOT/scripts/merge-json.js" "$GLOBAL_CONFIG/opencode.json" "$REPO_ROOT/opencode.json"
+  echo "  merged  opencode.json -> $GLOBAL_CONFIG/opencode.json"
 else
   echo "  WARN: opencode.json not found, skipping"
+fi
+
+if [[ -f "$REPO_ROOT/STANDARDS.md" ]]; then
+  cp "$REPO_ROOT/STANDARDS.md" "$GLOBAL_CONFIG/STANDARDS.md"
+  echo "  synced  STANDARDS.md -> $GLOBAL_CONFIG/STANDARDS.md"
+else
+  echo "  INFO: STANDARDS.md not found, skipping"
+fi
+
+COMMANDS_SOURCE="$REPO_ROOT/.opencode/commands"
+COMMANDS_DEST="$GLOBAL_CONFIG/commands"
+if [[ -d "$COMMANDS_SOURCE" ]]; then
+  mkdir -p "$COMMANDS_DEST"
+  while IFS= read -r -d '' f; do
+    cp "$f" "$COMMANDS_DEST/"
+    echo "  synced  commands/$(basename "$f") -> $COMMANDS_DEST/$(basename "$f")"
+  done < <(find "$COMMANDS_SOURCE" -maxdepth 1 -name "*.md" -print0)
+else
+  echo "  INFO: no .opencode/commands/ directory, skipping command deploy"
 fi
 
 echo ""

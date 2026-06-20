@@ -87,10 +87,34 @@ if (Test-Path -LiteralPath $AgentsMd) {
 
 $OpenCodeJson = Join-Path $RepoRoot 'opencode.json'
 if (Test-Path -LiteralPath $OpenCodeJson) {
-    Copy-Item -LiteralPath $OpenCodeJson -Destination (Join-Path $GlobalConfig 'opencode.json') -Force
-    Write-Host "  synced  opencode.json -> $GlobalConfig\opencode.json"
+    $GlobalOpenCodeJson = Join-Path $GlobalConfig 'opencode.json'
+    $MergeScript = Join-Path $RepoRoot 'scripts\merge-json.js'
+    node $MergeScript $GlobalOpenCodeJson $OpenCodeJson
+    if ($LASTEXITCODE -ne 0) { throw "merge-json.js failed (exit $LASTEXITCODE)" }
+    Write-Host "  merged  opencode.json -> $GlobalConfig\opencode.json"
 } else {
     Write-Host "  WARN: opencode.json not found, skipping"
+}
+
+$StandardsMd = Join-Path $RepoRoot 'STANDARDS.md'
+if (Test-Path -LiteralPath $StandardsMd) {
+    Copy-Item -LiteralPath $StandardsMd -Destination (Join-Path $GlobalConfig 'STANDARDS.md') -Force
+    Write-Host "  synced  STANDARDS.md -> $GlobalConfig\STANDARDS.md"
+} else {
+    Write-Host "  INFO: STANDARDS.md not found, skipping"
+}
+
+$CommandsSource = Join-Path $RepoRoot '.opencode\commands'
+$CommandsDest = Join-Path $GlobalConfig 'commands'
+if (Test-Path -LiteralPath $CommandsSource) {
+    New-Item -ItemType Directory -Path $CommandsDest -Force | Out-Null
+    $CommandFiles = @(Get-ChildItem -LiteralPath $CommandsSource -Filter '*.md' -File)
+    foreach ($File in $CommandFiles) {
+        Copy-Item -LiteralPath $File.FullName -Destination $CommandsDest -Force
+        Write-Host "  synced  commands/$($File.Name) -> $CommandsDest\$($File.Name)"
+    }
+} else {
+    Write-Host "  INFO: no .opencode/commands/ directory, skipping command deploy"
 }
 
 Write-Host ""
