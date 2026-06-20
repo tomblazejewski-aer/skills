@@ -29,15 +29,19 @@ The orchestrator gives you:
 
 1. **Load standards.** Read `STANDARDS.md` in the project root. If it is not there, use bash to read the global fallback — `cat ~/.config/opencode/STANDARDS.md` — which the shell will expand correctly. Do NOT pass `~` or `$HOME` to the Read tool; use bash for the global path. If neither exists, check `AGENTS.md` for inline standards. If no standards document is found, return `VERDICT: PASS` with a note that no standards file was found.
 
-2. **Review every changed file** against each rule in the standards document. Use `git diff` to see exactly what changed — focus your review on the diff, not unchanged code. For each violation, record the file path and line number.
+2. **Review every changed file** against each rule in the standards document. For each file in the FILES list, read its full content using the Read tool — do not rely solely on `git diff`. Use `git diff` only to confirm which files changed; judge violations from the full file. Apply every rule mechanically. Do not give the benefit of the doubt — if a rule clearly applies, it is a violation.
 
-   Key areas from the standard coding standards (check whatever your project's STANDARDS.md specifies):
-   - Function design: single concern, separate I/O from logic, return values not side effects
-   - Typing: strict types, no `Any`, explicit nullables, no tuple returns
-   - Naming: clear, intention-revealing names; no underscore-prefixed non-private names
-   - Documentation: comments document intent, function signatures documented
-   - Imports: all at top of file, no unused imports, no circular imports
-   - Testing: assert on full objects, not individual properties
+   For each violation, record the file path and line number.
+
+   Apply whatever rules the project's STANDARDS.md specifies. In addition, always check these concrete criteria:
+
+   **Testing — assert discipline**
+   - A test function that contains more than one `assert` statement, where each assert checks a separate field or property, is a violation of "assert on full objects". The correct form is: construct a single expected object, then assert `result == expected` in one statement. Flag any test that asserts individual properties in separate `assert` calls.
+
+   **Function design — single concern and return values**
+   - A non-trivial function that returns `None` and has more than ~20 lines of body is almost certainly violating "rely on return values, not side effects". The only legitimate exceptions are `__init__`, property setters, and functions whose explicit sole purpose is a side effect (e.g. `write_file(path, content)`). A function that both computes/builds something AND writes/saves the result violates this rule.
+   - A function longer than ~50 lines almost certainly violates "each function has one concern". Count the distinct operations it performs — if more than one, flag it.
+   - Separation of I/O from logic: if a function loads or writes data AND transforms/computes data, it must be split.
 
 ## Verdict
 
