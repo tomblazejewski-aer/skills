@@ -16,6 +16,10 @@ function deepMerge(target, source) {
 }
 
 let existing = {};
-try { existing = JSON.parse(fs.readFileSync(targetPath, 'utf8')); } catch (_) {}
+try {
+  existing = JSON.parse(fs.readFileSync(targetPath, 'utf8'));
+} catch (err) {
+  if (err.code !== 'ENOENT') throw err;
+}
 const incoming = JSON.parse(fs.readFileSync(sourcePath, 'utf8'));
 fs.writeFileSync(targetPath, JSON.stringify(deepMerge(existing, incoming), null, 2) + '\n');

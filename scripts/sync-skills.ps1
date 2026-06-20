@@ -90,6 +90,7 @@ if (Test-Path -LiteralPath $OpenCodeJson) {
     $GlobalOpenCodeJson = Join-Path $GlobalConfig 'opencode.json'
     $MergeScript = Join-Path $RepoRoot 'scripts\merge-json.js'
     node $MergeScript $GlobalOpenCodeJson $OpenCodeJson
+    if ($LASTEXITCODE -ne 0) { throw "merge-json.js failed (exit $LASTEXITCODE)" }
     Write-Host "  merged  opencode.json -> $GlobalConfig\opencode.json"
 } else {
     Write-Host "  WARN: opencode.json not found, skipping"
