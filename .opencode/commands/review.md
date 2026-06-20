@@ -15,6 +15,9 @@ Now perform a thorough review:
 1. Run every command listed under **Verification Commands** in the plan and report each result
 2. Check each item in the **Acceptance Criteria** checklist against the current code — mark each as passing or failing with a specific reason and file + line reference
 3. Check the changed files against the coding standards — flag every violation with file + line reference
+4. After checking each criterion, update the plan file to reflect the result:
+   - Criterion passes all checks → change `- [ ]` to `- [x]` (or leave `- [x]` if already set)
+   - Criterion fails any check → change `- [x]` to `- [ ]` (or leave `- [ ]` if already set)
 
 When done, produce a concise review report:
 

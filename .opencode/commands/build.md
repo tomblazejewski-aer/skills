@@ -13,10 +13,11 @@ Read the most recent plan file:
 
 Implement using TDD — vertical slices, one acceptance criterion at a time:
 
-1. Take the first unchecked acceptance criterion from the plan
+1. Take the first unchecked (`- [ ]`) acceptance criterion from the plan. Skip any already marked `- [x]`.
 2. Write a failing test for that behavior (RED)
 3. Write the minimal code to make it pass (GREEN)
 4. Refactor if needed — never while RED
-5. Repeat for the next criterion
+5. Update the plan file: change `- [ ]` to `- [x]` for this criterion
+6. Repeat from step 1 for the next unchecked criterion
 
 After all criteria are implemented, run every command listed under **Verification Commands** in the plan. Do not stop until all criteria pass and all commands succeed.
