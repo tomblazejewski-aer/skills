@@ -38,7 +38,7 @@ Load the **tdd** skill now. Then follow it throughout this step.
 1. Run `git diff` and read changed files to understand what work is already done.
 2. If prior `## Review Cycle` sections exist in `PLAN_FILE`, list every `VERDICT: FAIL` finding — these are your highest-priority fixes. Address them **before** tackling any remaining unchecked criteria.
 3. Implement remaining unchecked criteria (`- [ ]`) from the plan's Acceptance Criteria section one at a time using red→green TDD (vertical tracer bullets, not horizontal slices). After each criterion passes, edit `PLAN_FILE` to change `- [ ]` to `- [x]`.
-4. Read `STANDARDS.md` (or `~/.config/opencode/STANDARDS.md`), `CONTEXT.md`, and `AGENTS.md` if they exist. Obey them throughout.
+4. Read `STANDARDS.md` in the project root. If it is not there, use bash to read the global fallback — `cat ~/.config/opencode/STANDARDS.md` — which the shell will expand correctly. Do NOT pass `~` or `$HOME` to the Read tool; use bash for the global path. Also read `CONTEXT.md` and `AGENTS.md` if they exist. Obey all of them throughout.
 5. Run every command in the plan's **Verification Commands** section. All must pass before continuing to step 2.
 
 If you cannot get all verification commands to pass after honest effort:
