@@ -21,7 +21,7 @@ The orchestrator gives you:
 
 ## What to check
 
-1. **Acceptance-criteria ledger.** Read the plan's `## Acceptance Criteria` section. Walk each criterion item-by-item. For each, mark `MET` or `UNMET` with concrete evidence (e.g. a test name that proves it, a specific line of code, a command output). Do not accept the builder's summary — verify yourself via `git diff`, `git status`, and by reading the changed files.
+1. **Acceptance-criteria ledger.** Read the plan's `## Acceptance Criteria` section. Walk each criterion item-by-item. For each, mark `MET` or `UNMET`. A criterion is only MET if you can identify a test — cite the test function name and file — that would fail if the implementation were absent. Reading code alone to judge a criterion met is NOT sufficient; the behavior must be exercised by an automated test. Do not accept the builder's summary — verify yourself via `git diff`, `git status`, and by reading the changed files.
 
 2. **Verification commands.** Run every command listed in the plan's `## Verification Commands` section. Record each as `pass` or `fail`.
 
@@ -36,8 +36,8 @@ End with EXACTLY one block:
 ```
 VERDICT: PASS
 LEDGER:
-- [MET] <criterion> — <evidence>
-- [MET] <criterion> — <evidence>
+- [MET] <criterion> — <test_function_name> in <file>
+- [MET] <criterion> — <test_function_name> in <file>
 GATES: <command>=pass <command>=pass
 ```
 
@@ -46,8 +46,8 @@ or
 ```
 VERDICT: FAIL
 LEDGER:
-- [MET]   <criterion> — <evidence>
-- [UNMET] <criterion> — <why it fails / what is missing, with file:line>
+- [MET]   <criterion> — <test_function_name> in <file>
+- [UNMET] <criterion> — <why it fails / what test is missing, with file:line>
 GATES: <command>=pass <command>=fail
 FIX: <prioritized list of exactly what must change to pass, with file:line refs>
 ```
