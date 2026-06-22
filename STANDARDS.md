@@ -19,6 +19,7 @@
 - Use strict types; avoid relaxed types like `Any` or untyped dicts
 - Prefer explicit nullable types over implicit optionality
 - Never use a tuple as a return type when a named typed object can be used instead
+- Never use string literals for type annotations — always use the actual type (e.g. `Dog`, not `"Dog"`); use `from __future__ import annotations` or `TYPE_CHECKING` guards to break circular import cycles instead
 
 ## Naming
 
