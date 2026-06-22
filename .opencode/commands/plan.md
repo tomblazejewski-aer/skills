@@ -85,4 +85,6 @@ A checklist of behavioral test specifications derived from the interview and TDD
 
 All commands needed to confirm correctness (tests, lint, build, type-check, etc.).
 
+Before writing this section, explore the repo for existing quality gates — look for `Makefile` targets, `package.json` scripts, `pyproject.toml` tool configs (ruff, mypy, pytest), `.pre-commit-config.yaml`, CI config files, or any README instructions for running checks. Include those exact commands here so the builder runs the same gates the project already uses.
+
 Tell the user the path to the plan file when done.
