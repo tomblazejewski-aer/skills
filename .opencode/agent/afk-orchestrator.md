@@ -39,9 +39,10 @@ Load the **tdd** skill now. Then follow it throughout this step.
 
 1. Run `git diff` and read changed files to understand what work is already done.
 2. If prior `## Review Cycle` sections exist in `PLAN_FILE`, list every `VERDICT: FAIL` finding — these are your highest-priority fixes. Address them **before** tackling any remaining unchecked criteria.
-3. Implement remaining unchecked criteria (`- [ ]`) from the plan's Acceptance Criteria section one at a time using red→green TDD (vertical tracer bullets, not horizontal slices). For each criterion: (a) write a failing test that would fail if the implementation were absent, (b) write the minimal implementation to make it pass, (c) only then edit `PLAN_FILE` to change `- [ ]` to `- [x]`. **Do not mark a criterion done without a passing test for it.**
-4. Read `STANDARDS.md` in the project root. If it is not there, use bash to read the global fallback — `cat ~/.config/opencode/STANDARDS.md` — which the shell will expand correctly. Do NOT pass `~` or `$HOME` to the Read tool; use bash for the global path. Also read `CONTEXT.md` and `AGENTS.md` if they exist. Obey all of them throughout.
-5. Run every command in the plan's **Verification Commands** section. All must pass before continuing to step 2.
+3. **Pre-flight: clean touched files before writing new code.** Identify every file you plan to modify. For each one, read its full content and check it against STANDARDS.md. Fix any pre-existing violations now. This prevents reviewers from discovering layers of pre-existing debt across multiple cycles — without this step, each fix triggers the reviewer to re-examine the same file and find more violations it hadn't reached yet.
+4. Implement remaining unchecked criteria (`- [ ]`) from the plan's Acceptance Criteria section one at a time using red→green TDD (vertical tracer bullets, not horizontal slices). For each criterion: (a) write a failing test that would fail if the implementation were absent, (b) write the minimal implementation to make it pass, (c) only then edit `PLAN_FILE` to change `- [ ]` to `- [x]`. **Do not mark a criterion done without a passing test for it.**
+5. Read `STANDARDS.md` in the project root. If it is not there, use bash to read the global fallback — `cat ~/.config/opencode/STANDARDS.md` — which the shell will expand correctly. Do NOT pass `~` or `$HOME` to the Read tool; use bash for the global path. Also read `CONTEXT.md` and `AGENTS.md` if they exist. Obey all of them throughout.
+6. Run every command in the plan's **Verification Commands** section. All must pass before continuing to step 2.
 
 If you cannot get all verification commands to pass after honest effort:
 
