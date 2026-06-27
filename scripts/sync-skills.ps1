@@ -117,5 +117,18 @@ if (Test-Path -LiteralPath $CommandsSource) {
     Write-Host "  INFO: no .opencode/commands/ directory, skipping command deploy"
 }
 
+$AgentSource = Join-Path $RepoRoot '.opencode\agent'
+$AgentDest = Join-Path $GlobalConfig 'agent'
+if (Test-Path -LiteralPath $AgentSource) {
+    New-Item -ItemType Directory -Path $AgentDest -Force | Out-Null
+    $AgentFiles = @(Get-ChildItem -LiteralPath $AgentSource -Filter '*.md' -File)
+    foreach ($File in $AgentFiles) {
+        Copy-Item -LiteralPath $File.FullName -Destination $AgentDest -Force
+        Write-Host "  synced  agent/$($File.Name) -> $AgentDest\$($File.Name)"
+    }
+} else {
+    Write-Host "  INFO: no .opencode/agent/ directory, skipping agent deploy"
+}
+
 Write-Host ""
 Write-Host "Global config deploy complete."

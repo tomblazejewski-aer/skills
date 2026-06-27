@@ -35,6 +35,11 @@ Follow the grill-with-docs methodology above. Interview the user relentlessly ab
 - All edge cases and constraints
 - How it fits with the existing codebase and domain model
 - What "done" looks like
+- **Testing** — ask these explicitly, one at a time:
+  - What level of testing is expected? (unit tests against logic, tests through the public API, integration, end-to-end, or a mix)
+  - What kind of tests? (behavioral black-box, snapshot/regression, property-based, or other)
+  - Which behaviors MUST have tests, and which — if any — can be left without? (critical paths only, everything, or something else)
+  - Are there any behaviors that are intentionally untested, and if so, why?
 
 If a question can be answered by exploring the codebase, explore it instead of asking.
 
@@ -57,20 +62,29 @@ Ask the user to confirm the interface design and testing priorities before proce
 
 Write the plan to `.opencode/plans/<timestamp>-<slug>.md` (Unix timestamp + kebab-case slug).
 
-The file must contain exactly these three sections:
+The file must contain exactly these four sections:
 
 ### Implementation Approach
 
 A clear description of what changes will be made and why, including the public interface design and module structure.
 
+### Testing Approach
+
+Record the testing decisions from Phase 1:
+- Testing level and kind (unit, integration, end-to-end, behavioral black-box, etc.)
+- Which behaviors require tests (everything, critical paths only, or a named subset)
+- Any explicitly untested areas and the rationale
+
 ### Acceptance Criteria
 
-A checklist of behavioral test specifications derived from the interview and TDD design phase. Each item describes observable behavior through a public interface — not implementation details.
+A checklist of behavioral test specifications derived from the interview and TDD design phase. Each item describes observable behavior through a public interface — not implementation details. The builder will write a failing test for each criterion before implementing it; a criterion cannot be marked done without a passing test.
 
 - [ ] <behavioral specification>
 
 ### Verification Commands
 
 All commands needed to confirm correctness (tests, lint, build, type-check, etc.).
+
+Before writing this section, explore the repo for existing quality gates — look for `Makefile` targets, `package.json` scripts, `pyproject.toml` tool configs (ruff, mypy, pytest), `.pre-commit-config.yaml`, CI config files, or any README instructions for running checks. Include those exact commands here so the builder runs the same gates the project already uses.
 
 Tell the user the path to the plan file when done.

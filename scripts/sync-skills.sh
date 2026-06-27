@@ -113,5 +113,17 @@ else
   echo "  INFO: no .opencode/commands/ directory, skipping command deploy"
 fi
 
+AGENT_SOURCE="$REPO_ROOT/.opencode/agent"
+AGENT_DEST="$GLOBAL_CONFIG/agent"
+if [[ -d "$AGENT_SOURCE" ]]; then
+  mkdir -p "$AGENT_DEST"
+  while IFS= read -r -d '' f; do
+    cp "$f" "$AGENT_DEST/"
+    echo "  synced  agent/$(basename "$f") -> $AGENT_DEST/$(basename "$f")"
+  done < <(find "$AGENT_SOURCE" -maxdepth 1 -name "*.md" -print0)
+else
+  echo "  INFO: no .opencode/agent/ directory, skipping agent deploy"
+fi
+
 echo ""
 echo "Global config deploy complete."
