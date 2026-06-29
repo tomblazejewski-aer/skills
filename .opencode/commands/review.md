@@ -1,28 +1,57 @@
 ---
-description: Review implementation against the plan, acceptance criteria, and coding standards
+description: Review implementation against the plan using 3 parallel specialist reviewers — correctness, standards, and architecture.
 ---
 
-Read the most recent plan file:
+Find the most recent plan file:
 
-!ls -t .opencode/plans/*.md 2>/dev/null | head -1 | xargs cat 2>/dev/null || echo "No plan file found. Run /plan first."
+```bash
+ls -t .opencode/plans/*.md 2>/dev/null | head -1
+```
 
-Read the project's coding standards:
+If no plan file is found, stop and tell the user: "No plan file found. Run /plan first."
 
-!cat STANDARDS.md 2>/dev/null || cat "$HOME/.config/opencode/STANDARDS.md" 2>/dev/null || echo "No STANDARDS.md found"
+Store the path as `PLAN_FILE`. Read it in full.
 
-Now perform a thorough review:
+Determine the cycle number by counting existing `## Review Cycle` sections in `PLAN_FILE` and adding 1. If none exist, use 1.
 
-1. Run every command listed under **Verification Commands** in the plan and report each result
-2. Check each item in the **Acceptance Criteria** checklist against the current code — mark each as passing or failing with a specific reason and file + line reference
-3. Check the changed files against the coding standards — flag every violation with file + line reference
-4. After checking each criterion, update the plan file to reflect the result:
-   - Criterion passes all checks → change `- [ ]` to `- [x]` (or leave `- [x]` if already set)
-   - Criterion fails any check → change `- [x]` to `- [ ]` (or leave `- [ ]` if already set)
+Determine the list of changed files:
 
-When done, produce a concise review report:
+```bash
+git diff --name-only HEAD
+```
 
-- **PASS** or **FAIL** for each acceptance criterion
-- **PASS** or **FAIL** for each verification command
-- A list of any standards violations found (file + line for each)
+If the result is empty (all changes are already committed), fall back to:
 
-If there are failures or violations, describe exactly what needs to be fixed. The user will tab to the build agent to make the fixes, then return to `/review` to re-check.
+```bash
+git diff --name-only HEAD~1 HEAD
+```
+
+In a **single message**, invoke all three reviewer subagents simultaneously via the Task tool:
+
+1. `afk-reviewer-correctness` — pass `PLAN_FILE: <path>`, `FILES: <list>`, and the cycle number
+2. `afk-reviewer-standards` — pass `PLAN_FILE: <path>`, `FILES: <list>`, and the cycle number
+3. `afk-reviewer-architecture` — pass `PLAN_FILE: <path>`, `FILES: <list>`, and the cycle number
+
+Wait for all 3 results, then append the following block to the end of `PLAN_FILE`:
+
+```
+---
+
+## Review Cycle <CYCLE>
+
+### Correctness Reviewer
+VERDICT: <PASS | FAIL>
+<findings>
+
+### Standards Reviewer
+VERDICT: <PASS | FAIL>
+<findings>
+
+### Architecture Reviewer
+VERDICT: <PASS | FAIL>
+<findings>
+
+**Overall: <PASS — all 3 reviewers agreed | FAIL — N reviewer(s) blocked>**
+```
+
+Finally, report the overall result to the user. If any reviewer returned `VERDICT: FAIL`, list the specific findings and what must be fixed. If all three returned `VERDICT: PASS`, confirm the implementation is ready.
