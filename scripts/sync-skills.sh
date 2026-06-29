@@ -4,6 +4,8 @@
 #    so OpenCode discovers them as project-local skills.
 # 2. Deploys all skills, AGENTS.md, and opencode.json to ~/.config/opencode/
 #    so this repo is the single source of truth for global OpenCode config.
+# 3. Deploys all skills, AGENTS.md, and STANDARDS.md to ~/.claude/
+#    so Claude also picks up the same skills and instructions globally.
 #
 # Run from the repo root:
 #   ./scripts/sync-skills.sh
@@ -15,6 +17,8 @@ PLUGIN_JSON="$REPO_ROOT/.claude-plugin/plugin.json"
 LOCAL_DEST="$REPO_ROOT/.opencode/skills"
 GLOBAL_CONFIG="$HOME/.config/opencode"
 GLOBAL_DEST="$GLOBAL_CONFIG/skills"
+CLAUDE_CONFIG="$HOME/.claude"
+CLAUDE_SKILLS_DEST="$CLAUDE_CONFIG/skills"
 
 if [[ ! -f "$PLUGIN_JSON" ]]; then
   echo "ERROR: $PLUGIN_JSON not found." >&2
@@ -29,6 +33,7 @@ mapfile -t SKILL_PATHS < <(node -e "
 
 mkdir -p "$LOCAL_DEST"
 mkdir -p "$GLOBAL_DEST"
+mkdir -p "$CLAUDE_SKILLS_DEST"
 
 # Track which skill names we write so we can clean up stale ones
 declare -a WRITTEN_NAMES=()
@@ -42,13 +47,15 @@ for rel_path in "${SKILL_PATHS[@]}"; do
     continue
   fi
 
-  # Copy all .md files from the skill folder to both destinations
+  # Copy all .md files from the skill folder to all destinations
   copied=0
   mkdir -p "$LOCAL_DEST/$name"
   mkdir -p "$GLOBAL_DEST/$name"
+  mkdir -p "$CLAUDE_SKILLS_DEST/$name"
   while IFS= read -r -d '' f; do
     cp "$f" "$LOCAL_DEST/$name/"
     cp "$f" "$GLOBAL_DEST/$name/"
+    cp "$f" "$CLAUDE_SKILLS_DEST/$name/"
     ((copied++)) || true
   done < <(find "$src" -maxdepth 1 -name "*.md" -print0)
 
@@ -56,8 +63,8 @@ for rel_path in "${SKILL_PATHS[@]}"; do
   echo "  synced  $name  ($copied files)"
 done
 
-# Remove stale skill folders no longer in plugin.json — both destinations
-for dest_dir in "$LOCAL_DEST" "$GLOBAL_DEST"; do
+# Remove stale skill folders no longer in plugin.json — all destinations
+for dest_dir in "$LOCAL_DEST" "$GLOBAL_DEST" "$CLAUDE_SKILLS_DEST"; do
   if [[ -d "$dest_dir" ]]; then
     while IFS= read -r -d '' existing; do
       existing_name="$(basename "$existing")"
@@ -127,3 +134,24 @@ fi
 
 echo ""
 echo "Global config deploy complete."
+
+# Deploy AGENTS.md and STANDARDS.md to Claude global config
+echo ""
+echo "Deploying global config to $CLAUDE_CONFIG ..."
+
+if [[ -f "$REPO_ROOT/AGENTS.md" ]]; then
+  cp "$REPO_ROOT/AGENTS.md" "$CLAUDE_CONFIG/CLAUDE.md"
+  echo "  synced  AGENTS.md -> $CLAUDE_CONFIG/CLAUDE.md"
+else
+  echo "  WARN: AGENTS.md not found, skipping"
+fi
+
+if [[ -f "$REPO_ROOT/STANDARDS.md" ]]; then
+  cp "$REPO_ROOT/STANDARDS.md" "$CLAUDE_CONFIG/STANDARDS.md"
+  echo "  synced  STANDARDS.md -> $CLAUDE_CONFIG/STANDARDS.md"
+else
+  echo "  INFO: STANDARDS.md not found, skipping"
+fi
+
+echo ""
+echo "Claude config deploy complete."

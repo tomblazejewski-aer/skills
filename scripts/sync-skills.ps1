@@ -3,6 +3,8 @@
 #    so OpenCode discovers them as project-local skills.
 # 2. Deploys all skills, AGENTS.md, and opencode.json to $env:USERPROFILE\.config\opencode\
 #    so this repo is the single source of truth for global OpenCode config.
+# 3. Deploys all skills, AGENTS.md, and STANDARDS.md to $env:USERPROFILE\.claude\
+#    so Claude also picks up the same skills and instructions globally.
 #
 # Run from the repo root:
 #   .\scripts\sync-skills.ps1
@@ -15,6 +17,8 @@ $PluginJson = Join-Path $RepoRoot '.claude-plugin\plugin.json'
 $LocalDest = Join-Path $RepoRoot '.opencode\skills'
 $GlobalConfig = Join-Path $env:USERPROFILE '.config\opencode'
 $GlobalDest = Join-Path $GlobalConfig 'skills'
+$ClaudeConfig = Join-Path $env:USERPROFILE '.claude'
+$ClaudeSkillsDest = Join-Path $ClaudeConfig 'skills'
 
 if (-not (Test-Path -LiteralPath $PluginJson)) {
     Write-Error "ERROR: $PluginJson not found."
@@ -26,6 +30,7 @@ $SkillPaths = @(node -e "const p = require('$($PluginJson -replace '\\','/')'); 
 
 New-Item -ItemType Directory -Path $LocalDest -Force | Out-Null
 New-Item -ItemType Directory -Path $GlobalDest -Force | Out-Null
+New-Item -ItemType Directory -Path $ClaudeSkillsDest -Force | Out-Null
 
 # Track which skill names we write so we can clean up stale ones
 $WrittenNames = @()
@@ -54,12 +59,18 @@ foreach ($RelPath in $SkillPaths) {
         Copy-Item -LiteralPath $File.FullName -Destination $GlobalSkill -Force
     }
 
+    $ClaudeSkill = Join-Path $ClaudeSkillsDest $Name
+    New-Item -ItemType Directory -Path $ClaudeSkill -Force | Out-Null
+    foreach ($File in $Files) {
+        Copy-Item -LiteralPath $File.FullName -Destination $ClaudeSkill -Force
+    }
+
     $WrittenNames += $Name
     Write-Host "  synced  $Name  ($($Files.Count) files)"
 }
 
-# Remove stale skill folders no longer in plugin.json — both destinations
-foreach ($DestDir in @($LocalDest, $GlobalDest)) {
+# Remove stale skill folders no longer in plugin.json — all destinations
+foreach ($DestDir in @($LocalDest, $GlobalDest, $ClaudeSkillsDest)) {
     if (Test-Path -LiteralPath $DestDir) {
         Get-ChildItem -LiteralPath $DestDir -Directory | ForEach-Object {
             if ($WrittenNames -notcontains $_.Name) {
@@ -132,3 +143,24 @@ if (Test-Path -LiteralPath $AgentSource) {
 
 Write-Host ""
 Write-Host "Global config deploy complete."
+
+# Deploy AGENTS.md and STANDARDS.md to Claude global config
+Write-Host ""
+Write-Host "Deploying global config to $ClaudeConfig ..."
+
+if (Test-Path -LiteralPath $AgentsMd) {
+    Copy-Item -LiteralPath $AgentsMd -Destination (Join-Path $ClaudeConfig 'CLAUDE.md') -Force
+    Write-Host "  synced  AGENTS.md -> $ClaudeConfig\CLAUDE.md"
+} else {
+    Write-Host "  WARN: AGENTS.md not found, skipping"
+}
+
+if (Test-Path -LiteralPath $StandardsMd) {
+    Copy-Item -LiteralPath $StandardsMd -Destination (Join-Path $ClaudeConfig 'STANDARDS.md') -Force
+    Write-Host "  synced  STANDARDS.md -> $ClaudeConfig\STANDARDS.md"
+} else {
+    Write-Host "  INFO: STANDARDS.md not found, skipping"
+}
+
+Write-Host ""
+Write-Host "Claude config deploy complete."
